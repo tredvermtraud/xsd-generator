@@ -1,0 +1,34 @@
+{
+    "name": "ermtraud/xsd-to-php-generator",
+    "description": "XSD-to-PHP class generator for attribute-mapped XML DTOs.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "xsd",
+        "xml",
+        "code-generation",
+        "generator"
+    ],
+    "require": {
+        "php": "^8.3|^8.4",
+        "ext-dom": "*",
+        "ext-libxml": "*",
+        "ermtraud/xsd-to-php-runtime": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ermtraud\\XsdToPhp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ermtraud\\XsdToPhp\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

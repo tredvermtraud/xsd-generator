@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://example.org/order"
+    xmlns:tns="http://example.org/order"
+    xmlns:common="http://example.org/common"
+    elementFormDefault="qualified">
+    <import namespace="http://example.org/common"/>
+
+    <complexType name="PurchaseOrderType">
+        <sequence>
+            <element name="customerName" type="common:SharedTextType"/>
+            <element name="orderDate" type="date"/>
+        </sequence>
+        <attribute name="orderNumber" type="string" use="required"/>
+    </complexType>
+</schema>

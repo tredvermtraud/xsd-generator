@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://example.org/common"
+    xmlns:tns="http://example.org/common"
+    elementFormDefault="qualified">
+    <simpleType name="SharedTextType">
+        <restriction base="string"/>
+    </simpleType>
+</schema>
