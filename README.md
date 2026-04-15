@@ -1,0 +1,97 @@
+# XSD Generator
+
+[![PHP Version](https://img.shields.io/badge/php-%5E8.3%7C%5E8.4-blue.svg)](https://php.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A PHP library for generating DTO-style classes from XSD (XML Schema Definition) files. This generator creates attribute-mapped XML DTOs that can be used with the [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) library for seamless XML serialization and deserialization.
+
+## Features
+
+- **XSD to PHP Conversion**: Automatically generates PHP classes from XSD schemas
+- **Multi-file Schema Support**: Handles complex schemas with `xs:include` and `xs:import` directives
+- **Namespace Mapping**: Configurable mapping from XML namespaces to PHP namespaces
+- **Attribute-mapped DTOs**: Generates classes compatible with attribute-based XML mapping
+- **Configurable Output**: Customizable class suffixes, strict types, and overwrite behavior
+- **Validation**: Built-in validation of generated classes and schema resolution
+
+## Installation
+
+Install via Composer:
+
+```bash
+composer require ermtraud/xsd-generator
+```
+
+## Usage
+
+### Basic Example
+
+```php
+use Ermtraud\XsdToPhp\Config\GeneratorConfig;
+use Ermtraud\XsdToPhp\Generator\XsdToPhpGenerator;
+
+$config = GeneratorConfig::fromArray([
+    'input_schema' => 'path/to/your/schema.xsd',
+    'entrypoint' => 'RootElement',
+    'output_directory' => 'generated',
+    'base_namespace' => 'Your\\Namespace',
+    'namespace_map' => [
+        'http://example.com/schema' => 'Your\\Schema',
+    ],
+    'schema_locations' => [
+        'http://example.com/schema' => 'path/to/schema.xsd',
+    ],
+]);
+
+$generator = new XsdToPhpGenerator();
+$result = $generator->generate($config);
+
+echo "Generated files:\n";
+foreach ($result->generatedFiles as $file) {
+    echo "- $file\n";
+}
+
+if (!empty($result->warnings)) {
+    echo "Warnings:\n";
+    foreach ($result->warnings as $warning) {
+        echo "- $warning\n";
+    }
+}
+```
+
+### Configuration Options
+
+The `GeneratorConfig` accepts the following options:
+
+- `input_schema` (string, required): Path to the main XSD file
+- `entrypoint` (string, required): Name of the root element or complex type to start generation from
+- `output_directory` (string, required): Directory where generated classes will be saved
+- `base_namespace` (string, required): Base PHP namespace for generated classes
+- `namespace_map` (array, optional): Map XML namespaces to PHP namespaces
+- `schema_locations` (array, optional): Map namespace URIs to schema file paths
+- `class_suffix` (string, optional, default: 'Type'): Suffix to append to generated class names
+- `strict_types` (bool, optional, default: true): Enable strict types in generated classes
+- `overwrite_existing` (bool, optional, default: false): Whether to overwrite existing files
+
+## Requirements
+
+- PHP 8.3 or 8.4
+- `ext-dom` extension
+- `ext-libxml` extension
+- [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) for runtime XML handling
+
+## Testing
+
+Run the test suite using PHPUnit:
+
+```bash
+composer test
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
