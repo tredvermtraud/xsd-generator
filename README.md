@@ -1,7 +1,7 @@
 # XSD Generator
 
-[![PHP Version](https://img.shields.io/badge/php-%5E8.3%7C%5E8.4-blue.svg)](https://php.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PHP Version](https://img.shields.io/badge/php-%5E8.3%7C%5E8.4-blue.svg)](https://php.net/)
 
 A PHP library for generating DTO-style classes from XSD (XML Schema Definition) files. This generator creates attribute-mapped XML DTOs that can be used with the [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) library for seamless XML serialization and deserialization.
 
@@ -21,6 +21,13 @@ Install via Composer:
 ```bash
 composer require ermtraud/xsd-generator
 ```
+
+## Requirements
+
+- PHP 8.3 or 8.4
+- `ext-dom` extension
+- `ext-libxml` extension
+- [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) for runtime XML handling
 
 ## Usage
 
@@ -73,13 +80,6 @@ The `GeneratorConfig` accepts the following options:
 - `strict_types` (bool, optional, default: true): Enable strict types in generated classes
 - `overwrite_existing` (bool, optional, default: false): Whether to overwrite existing files
 
-## Requirements
-
-- PHP 8.3 or 8.4
-- `ext-dom` extension
-- `ext-libxml` extension
-- [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) for runtime XML handling
-
 ## Testing
 
 Run the test suite using PHPUnit:
@@ -88,10 +88,10 @@ Run the test suite using PHPUnit:
 composer test
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
