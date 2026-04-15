@@ -1,5 +1,5 @@
 {
-    "name": "ermtraud/xsd-to-php-generator",
+    "name": "ermtraud/xsd-generator",
     "description": "XSD-to-PHP class generator for attribute-mapped XML DTOs.",
     "type": "library",
     "license": "MIT",
@@ -9,11 +9,17 @@
         "code-generation",
         "generator"
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "C:/Users/Runkel.ASGARD/Documents/Projects/ermtraud/xml-runtime"
+        }
+    ],
     "require": {
         "php": "^8.3|^8.4",
         "ext-dom": "*",
         "ext-libxml": "*",
-        "ermtraud/xsd-to-php-runtime": "^1.0"
+        "ermtraud/xml-runtime": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.0"
@@ -30,5 +36,7 @@
     },
     "scripts": {
         "test": "phpunit"
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
