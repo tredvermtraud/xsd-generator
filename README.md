@@ -66,7 +66,7 @@ if (!empty($result->warnings)) {
 }
 ```
 
-### Configuration Options
+## Configuration
 
 The `GeneratorConfig` accepts the following options:
 
