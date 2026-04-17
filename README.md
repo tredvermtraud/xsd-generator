@@ -79,6 +79,7 @@ The `GeneratorConfig` accepts the following options:
 - `class_suffix` (string, optional, default: 'Type'): Suffix to append to generated class names
 - `strict_types` (bool, optional, default: true): Enable strict types in generated classes
 - `overwrite_existing` (bool, optional, default: false): Whether to overwrite existing files
+- `prefer_entrypoint_namespace_declarations` (bool, optional, default: false): Prefer `xmlns:*` prefixes from the configured `input_schema` when generating root namespace declarations, while still falling back to schema-local declarations for namespaces the entrypoint does not declare
 
 ## Testing
 

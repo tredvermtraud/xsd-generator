@@ -25,6 +25,7 @@ final readonly class GeneratorConfig
         public string $classSuffix,
         public bool $strictTypes,
         public bool $overwriteExisting,
+        public bool $preferEntrypointNamespaceDeclarations,
     ) {
     }
 
@@ -44,6 +45,7 @@ final readonly class GeneratorConfig
         $classSuffix = (string) ($config['class_suffix'] ?? 'Type');
         $strictTypes = (bool) ($config['strict_types'] ?? true);
         $overwriteExisting = (bool) ($config['overwrite_existing'] ?? false);
+        $preferEntrypointNamespaceDeclarations = (bool) ($config['prefer_entrypoint_namespace_declarations'] ?? false);
 
         if (!is_array($namespaceMap)) {
             throw new InvalidConfiguration('The "generator.namespace_map" value must be an array.');
@@ -75,6 +77,7 @@ final readonly class GeneratorConfig
             classSuffix: $classSuffix,
             strictTypes: $strictTypes,
             overwriteExisting: $overwriteExisting,
+            preferEntrypointNamespaceDeclarations: $preferEntrypointNamespaceDeclarations,
         );
     }
 

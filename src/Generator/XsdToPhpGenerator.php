@@ -31,7 +31,12 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
         }
 
         $schemaDocuments = $this->loadSchemaGraph($schemaPath, $config);
-        $entrypointMetadata = $this->resolveEntrypoint($schemaDocuments, $entrypoint);
+        $entrypointMetadata = $this->resolveEntrypoint(
+            $schemaDocuments,
+            $entrypoint,
+            $this->schemaNamespaceDeclarations($schemaPath),
+            $config->preferEntrypointNamespaceDeclarations,
+        );
         $definitions = $this->collectClassDefinitions($schemaDocuments, $entrypointMetadata, $config);
         $commonNamespace = $this->commonNamespacePrefix(array_column($definitions, 'php_namespace'));
 
@@ -84,7 +89,12 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
         );
     }
 
-    private function resolveEntrypoint(array $schemaDocuments, string $entrypoint): array
+    private function resolveEntrypoint(
+        array $schemaDocuments,
+        string $entrypoint,
+        array $entrypointNamespaceDeclarations,
+        bool $preferEntrypointNamespaceDeclarations,
+    ): array
     {
         foreach ($schemaDocuments as $schemaDocument) {
             foreach ($this->iterateGlobalSchemaNodes($schemaDocument['document'], 'element') as $element) {
@@ -96,7 +106,11 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
                     'class_name' => $entrypoint,
                     'root_name' => $element->getAttribute('name'),
                     'target_namespace' => $schemaDocument['target_namespace'],
-                    'root_namespaces' => $this->schemaNamespaceDeclarations($schemaDocument['path']),
+                    'root_namespaces' => $this->resolveRootNamespaceDeclarations(
+                        $this->schemaNamespaceDeclarations($schemaDocument['path']),
+                        $entrypointNamespaceDeclarations,
+                        $preferEntrypointNamespaceDeclarations,
+                    ),
                     'type_node' => $this->resolveElementTypeNode($schemaDocuments, $element, $schemaDocument['target_namespace']),
                     'type_namespace' => $schemaDocument['target_namespace'],
                 ];
@@ -114,7 +128,11 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
                     'root_name' => $this->findRootNameForType($schemaDocuments, $entrypoint, $schemaDocument['target_namespace'])
                         ?? $complexType->getAttribute('name'),
                     'target_namespace' => $schemaDocument['target_namespace'],
-                    'root_namespaces' => $this->schemaNamespaceDeclarations($schemaDocument['path']),
+                    'root_namespaces' => $this->resolveRootNamespaceDeclarations(
+                        $this->schemaNamespaceDeclarations($schemaDocument['path']),
+                        $entrypointNamespaceDeclarations,
+                        $preferEntrypointNamespaceDeclarations,
+                    ),
                     'type_node' => $complexType,
                     'type_namespace' => $schemaDocument['target_namespace'],
                 ];
@@ -860,6 +878,50 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
         }
 
         return $namespaces;
+    }
+
+    /**
+     * @param array<string, string> $schemaNamespaceDeclarations
+     * @param array<string, string> $entrypointNamespaceDeclarations
+     *
+     * @return array<string, string>
+     */
+    private function resolveRootNamespaceDeclarations(
+        array $schemaNamespaceDeclarations,
+        array $entrypointNamespaceDeclarations,
+        bool $preferEntrypointNamespaceDeclarations,
+    ): array {
+        if (!$preferEntrypointNamespaceDeclarations) {
+            return $schemaNamespaceDeclarations;
+        }
+
+        return $this->mergeNamespaceDeclarations(
+            preferredDeclarations: $entrypointNamespaceDeclarations,
+            fallbackDeclarations: $schemaNamespaceDeclarations,
+        );
+    }
+
+    /**
+     * @param array<string, string> $preferredDeclarations
+     * @param array<string, string> $fallbackDeclarations
+     *
+     * @return array<string, string>
+     */
+    private function mergeNamespaceDeclarations(array $preferredDeclarations, array $fallbackDeclarations): array
+    {
+        $mergedDeclarations = $preferredDeclarations;
+        $declaredNamespaces = array_fill_keys(array_values($preferredDeclarations), true);
+
+        foreach ($fallbackDeclarations as $prefix => $namespace) {
+            if (isset($mergedDeclarations[$prefix]) || isset($declaredNamespaces[$namespace])) {
+                continue;
+            }
+
+            $mergedDeclarations[$prefix] = $namespace;
+            $declaredNamespaces[$namespace] = true;
+        }
+
+        return $mergedDeclarations;
     }
 
     private function resolveLocalElementNamespace(DOMElement $element, ?string $typeNamespace): ?string

@@ -56,6 +56,59 @@ final class XsdToPhpGeneratorTest extends TestCase
         self::assertStringContainsString('resolved its schema graph through xs:include/xs:import directives', implode("\n", $result->warnings));
     }
 
+    public function testItKeepsSchemaLocalNamespaceDeclarationsByDefault(): void
+    {
+        $outputDirectory = $this->createTemporaryDirectory();
+        $config = $this->buildConfig([
+            'generator' => [
+                'input_schema' => $this->schemaPath('prefix-preference/entrypoint.xsd'),
+                'entrypoint' => 'MessageType',
+                'output_directory' => $outputDirectory,
+                'base_namespace' => 'Tests\\Generated\\Communication',
+                'namespace_map' => [
+                    'http://example.org/communication' => 'Tests\\Generated\\Communication',
+                ],
+                'schema_locations' => [
+                    'http://example.org/communication' => $this->schemaPath('prefix-preference/entrypoint.xsd'),
+                ],
+            ],
+        ]);
+
+        (new XsdToPhpGenerator())->generate($config);
+        $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'MessageType.php');
+
+        self::assertStringContainsString("'kom' => 'http://example.org/communication'", $contents);
+        self::assertStringContainsString("'aux' => 'http://example.org/auxiliary'", $contents);
+        self::assertStringNotContainsString("'komm' => 'http://example.org/communication'", $contents);
+    }
+
+    public function testItCanPreferEntrypointNamespaceDeclarationsOverSchemaLocalPrefixes(): void
+    {
+        $outputDirectory = $this->createTemporaryDirectory();
+        $config = $this->buildConfig([
+            'generator' => [
+                'input_schema' => $this->schemaPath('prefix-preference/entrypoint.xsd'),
+                'entrypoint' => 'MessageType',
+                'output_directory' => $outputDirectory,
+                'base_namespace' => 'Tests\\Generated\\Communication',
+                'namespace_map' => [
+                    'http://example.org/communication' => 'Tests\\Generated\\Communication',
+                ],
+                'schema_locations' => [
+                    'http://example.org/communication' => $this->schemaPath('prefix-preference/entrypoint.xsd'),
+                ],
+                'prefer_entrypoint_namespace_declarations' => true,
+            ],
+        ]);
+
+        (new XsdToPhpGenerator())->generate($config);
+        $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'MessageType.php');
+
+        self::assertStringContainsString("'komm' => 'http://example.org/communication'", $contents);
+        self::assertStringContainsString("'aux' => 'http://example.org/auxiliary'", $contents);
+        self::assertStringNotContainsString("'kom' => 'http://example.org/communication'", $contents);
+    }
+
     /**
      * @param array<string, mixed> $config
      */
@@ -71,6 +124,7 @@ final class XsdToPhpGeneratorTest extends TestCase
             'class_suffix' => 'Type',
             'strict_types' => true,
             'overwrite_existing' => false,
+            'prefer_entrypoint_namespace_declarations' => false,
         ], $config['generator'] ?? $config));
     }
 
