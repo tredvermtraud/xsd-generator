@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "C:/Users/Runkel.ASGARD/Documents/Projects/ermtraud/xml-runtime",
-                "reference": "20c7ecf6b732503da5130d408d636b519b608b0c"
+                "reference": "f744b5a1d724f57ce4cc783e801991a32d0db707"
             },
             "require": {
                 "ext-dom": "*",
