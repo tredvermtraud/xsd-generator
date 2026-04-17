@@ -2,7 +2,7 @@
 <xs:schema
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     targetNamespace="http://example.org/communication"
-    xmlns:kom="http://example.org/communication"
+    xmlns:komm="http://example.org/communication"
     xmlns:aux="http://example.org/auxiliary"
     elementFormDefault="qualified">
     <xs:complexType name="MessageType">

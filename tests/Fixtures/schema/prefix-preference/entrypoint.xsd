@@ -2,9 +2,9 @@
 <xs:schema
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     targetNamespace="http://example.org/communication"
-    xmlns:komm="http://example.org/communication"
+    xmlns:kom="http://example.org/communication"
     elementFormDefault="qualified">
     <xs:include schemaLocation="communication-types.xsd"/>
 
-    <xs:element name="message" type="komm:MessageType"/>
+    <xs:element name="message" type="kom:MessageType"/>
 </xs:schema>

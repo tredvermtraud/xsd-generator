@@ -77,9 +77,9 @@ final class XsdToPhpGeneratorTest extends TestCase
         (new XsdToPhpGenerator())->generate($config);
         $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'MessageType.php');
 
-        self::assertStringContainsString("'kom' => 'http://example.org/communication'", $contents);
+        self::assertStringContainsString("'komm' => 'http://example.org/communication'", $contents);
         self::assertStringContainsString("'aux' => 'http://example.org/auxiliary'", $contents);
-        self::assertStringNotContainsString("'komm' => 'http://example.org/communication'", $contents);
+        self::assertStringNotContainsString("'kom' => 'http://example.org/communication'", $contents);
     }
 
     public function testItCanPreferEntrypointNamespaceDeclarationsOverSchemaLocalPrefixes(): void
@@ -104,9 +104,9 @@ final class XsdToPhpGeneratorTest extends TestCase
         (new XsdToPhpGenerator())->generate($config);
         $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'MessageType.php');
 
-        self::assertStringContainsString("'komm' => 'http://example.org/communication'", $contents);
+        self::assertStringContainsString("'kom' => 'http://example.org/communication'", $contents);
         self::assertStringContainsString("'aux' => 'http://example.org/auxiliary'", $contents);
-        self::assertStringNotContainsString("'kom' => 'http://example.org/communication'", $contents);
+        self::assertStringNotContainsString("'komm' => 'http://example.org/communication'", $contents);
     }
 
     /**
