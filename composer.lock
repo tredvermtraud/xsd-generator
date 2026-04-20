@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5716a41e6dd9ae97fc8158647ff69a03",
+    "content-hash": "7a9058541de20c1d6f45a1339d5f01d9",
     "packages": [
         {
             "name": "ermtraud/xml-runtime",
