@@ -109,6 +109,33 @@ final class XsdToPhpGeneratorTest extends TestCase
         self::assertStringNotContainsString("'komm' => 'http://example.org/communication'", $contents);
     }
 
+    public function testItInitializesPropertiesFromFixedElementAndAttributeValues(): void
+    {
+        $outputDirectory = $this->createTemporaryDirectory();
+        $config = $this->buildConfig([
+            'generator' => [
+                'input_schema' => $this->schemaPath('fixed-values/schema.xsd'),
+                'entrypoint' => 'FixedValueType',
+                'output_directory' => $outputDirectory,
+                'base_namespace' => 'Tests\\Generated\\FixedValues',
+                'namespace_map' => [
+                    'http://example.org/fixed-values' => 'Tests\\Generated\\FixedValues',
+                ],
+                'schema_locations' => [
+                    'http://example.org/fixed-values' => $this->schemaPath('fixed-values/schema.xsd'),
+                ],
+            ],
+        ]);
+
+        (new XsdToPhpGenerator())->generate($config);
+        $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'FixedValueType.php');
+
+        self::assertStringContainsString("public ?string \$status = 'active';", $contents);
+        self::assertStringContainsString('public ?int $count = 5;', $contents);
+        self::assertStringContainsString('public ?bool $enabled = true;', $contents);
+        self::assertStringContainsString("public ?string \$listURI = 'urn:example:fixed';", $contents);
+    }
+
     /**
      * @param array<string, mixed> $config
      */
