@@ -460,6 +460,10 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
             'namespace' => $namespace,
             'php_type' => $phpType,
             'item_type_expression' => $itemTypeExpression,
+            'default_value_expression' => $this->resolveFixedValueExpression(
+                $element->getAttribute('fixed') !== '' ? $element : $resolvedElement,
+                $phpType,
+            ),
         ];
     }
 
@@ -561,6 +565,7 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
             'namespace' => null,
             'php_type' => '?' . $typeName,
             'item_type_expression' => null,
+            'default_value_expression' => $this->resolveFixedValueExpression($attribute, '?' . $typeName),
         ];
     }
 
@@ -980,6 +985,55 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
         return $maxOccurs !== '' && ctype_digit($maxOccurs) && (int) $maxOccurs > 1;
     }
 
+    private function resolveFixedValueExpression(?DOMElement $node, string $phpType): ?string
+    {
+        if (!$node instanceof DOMElement) {
+            return null;
+        }
+
+        $fixedValue = $node->getAttribute('fixed');
+        if ($fixedValue === '' || $phpType === 'array') {
+            return null;
+        }
+
+        $normalizedType = ltrim($phpType, '?');
+
+        return match ($normalizedType) {
+            'bool' => $this->parseBooleanFixedValue($fixedValue),
+            'int' => $this->parseIntegerFixedValue($fixedValue),
+            'float' => $this->parseFloatFixedValue($fixedValue),
+            'string', 'mixed' => var_export($fixedValue, true),
+            default => null,
+        };
+    }
+
+    private function parseBooleanFixedValue(string $fixedValue): ?string
+    {
+        return match (strtolower($fixedValue)) {
+            'true', '1' => 'true',
+            'false', '0' => 'false',
+            default => null,
+        };
+    }
+
+    private function parseIntegerFixedValue(string $fixedValue): ?string
+    {
+        if (!preg_match('/^[+-]?\d+$/', $fixedValue)) {
+            return null;
+        }
+
+        return (string) (int) $fixedValue;
+    }
+
+    private function parseFloatFixedValue(string $fixedValue): ?string
+    {
+        if (!is_numeric($fixedValue)) {
+            return null;
+        }
+
+        return var_export((float) $fixedValue, true);
+    }
+
     private function normalizePropertyName(string $name): string
     {
         $normalized = preg_replace('/[^A-Za-z0-9]+/', ' ', $name) ?? $name;
@@ -1229,7 +1283,11 @@ PHP;
                 $arguments[] = sprintf("namespace: '%s'", addslashes($property['namespace']));
             }
 
-            $defaultValue = $property['php_type'] === 'array' ? ' = []' : ' = null';
+            $defaultValue = match (true) {
+                isset($property['default_value_expression']) && $property['default_value_expression'] !== null => ' = ' . $property['default_value_expression'],
+                $property['php_type'] === 'array' => ' = []',
+                default => ' = null',
+            };
 
             $definitions[] = sprintf('    #[XmlElement(%s)]', implode(', ', $arguments));
             $definitions[] = sprintf('    public %s $%s%s;', $property['php_type'], $property['property_name'], $defaultValue);
