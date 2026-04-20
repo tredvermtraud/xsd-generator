@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.org/fixed-values"
+           xmlns="http://example.org/fixed-values"
+           elementFormDefault="qualified">
+    <xs:complexType name="FixedValueType">
+        <xs:sequence>
+            <xs:element name="status" type="xs:token" fixed="active"/>
+            <xs:element name="count" type="xs:int" fixed="5"/>
+            <xs:element name="enabled" type="xs:boolean" fixed="true"/>
+        </xs:sequence>
+        <xs:attribute name="listURI" type="xs:anyURI" fixed="urn:example:fixed"/>
+    </xs:complexType>
+</xs:schema>
