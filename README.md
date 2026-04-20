@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PHP Version](https://img.shields.io/badge/php-%5E8.3%7C%5E8.4-blue.svg)](https://php.net/)
+![AI Assisted](https://img.shields.io/badge/AI-Assisted-firebrick?logo=githubcopilot)
 
 A PHP library for generating DTO-style classes from XSD (XML Schema Definition) files. This generator creates attribute-mapped XML DTOs that can be used with the [ermtraud/xml-runtime](https://github.com/ermtraud/xml-runtime) library for seamless XML serialization and deserialization.
 
