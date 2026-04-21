@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5716a41e6dd9ae97fc8158647ff69a03",
+    "content-hash": "756ffb3f7ff031f24a1f647b561ae7ef",
     "packages": [
         {
             "name": "ermtraud/xml-runtime",
-            "version": "dev-main",
+            "version": "dev-staging",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:tredvermtraud/xml-runtime.git",
+                "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5"
+            },
             "dist": {
-                "type": "path",
-                "url": "C:/Users/Runkel.ASGARD/Documents/Projects/ermtraud/xml-runtime",
-                "reference": "f744b5a1d724f57ce4cc783e801991a32d0db707"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tredvermtraud/xml-runtime/zipball/6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
+                "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
+                "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
@@ -48,9 +54,11 @@
                 "serializer",
                 "xml"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "source": "https://github.com/tredvermtraud/xml-runtime/tree/staging",
+                "issues": "https://github.com/tredvermtraud/xml-runtime/issues"
+            },
+            "time": "2026-04-20T14:47:05+00:00"
         }
     ],
     "packages-dev": [
@@ -637,16 +645,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.20",
+            "version": "12.5.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c2364520611caa03567a8a020f2d59f3f90b115a"
+                "reference": "c54fcf3d6bcb6e96ac2f7e40097dc37b5f139969"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c2364520611caa03567a8a020f2d59f3f90b115a",
-                "reference": "c2364520611caa03567a8a020f2d59f3f90b115a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c54fcf3d6bcb6e96ac2f7e40097dc37b5f139969",
+                "reference": "c54fcf3d6bcb6e96ac2f7e40097dc37b5f139969",
                 "shasum": ""
             },
             "require": {
@@ -660,7 +668,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.3",
-                "phpunit/php-code-coverage": "^12.5.5",
+                "phpunit/php-code-coverage": "^12.5.6",
                 "phpunit/php-file-iterator": "^6.0.1",
                 "phpunit/php-invoker": "^6.0.0",
                 "phpunit/php-text-template": "^5.0.0",
@@ -668,7 +676,7 @@
                 "sebastian/cli-parser": "^4.2.0",
                 "sebastian/comparator": "^7.1.6",
                 "sebastian/diff": "^7.0.0",
-                "sebastian/environment": "^8.0.4",
+                "sebastian/environment": "^8.1.0",
                 "sebastian/exporter": "^7.0.2",
                 "sebastian/global-state": "^8.0.2",
                 "sebastian/object-enumerator": "^7.0.0",
@@ -715,7 +723,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.20"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.23"
             },
             "funding": [
                 {
@@ -723,7 +731,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-04-15T05:05:59+00:00"
+            "time": "2026-04-18T06:12:49+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1727,7 +1735,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "ermtraud/xml-runtime": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
