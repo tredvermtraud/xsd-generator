@@ -8,6 +8,8 @@ use DOMDocument;
 use DOMElement;
 use Ermtraud\XsdToPhp\Config\GeneratorConfig;
 use Ermtraud\XsdToPhp\Contract\ClassGeneratorInterface;
+use Ermtraud\XsdToPhp\Definition\ClassDefinition;
+use Ermtraud\XsdToPhp\Definition\PropertyDefinition;
 use Ermtraud\XsdToPhp\Exception\GenerationException;
 
 /**
@@ -37,8 +39,13 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
             $this->schemaNamespaceDeclarations($schemaPath),
             $config->preferEntrypointNamespaceDeclarations,
         );
-        $definitions = $this->collectClassDefinitions($schemaDocuments, $entrypointMetadata, $config);
-        $commonNamespace = $this->commonNamespacePrefix(array_column($definitions, 'php_namespace'));
+        $definitions = $this->applyTransformers(
+            $this->hydrateClassDefinitions($this->collectClassDefinitions($schemaDocuments, $entrypointMetadata, $config)),
+            $config->transformers,
+        );
+        $commonNamespace = $this->commonNamespacePrefix(
+            array_map(static fn (ClassDefinition $definition): string => $definition->phpNamespace, $definitions),
+        );
 
         $targetDirectory = $config->outputDirectory;
         if (!is_dir($targetDirectory) && !mkdir($targetDirectory, 0777, true) && !is_dir($targetDirectory)) {
@@ -52,8 +59,8 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
             $targetFile = $this->buildOutputFilePath(
                 targetDirectory: $targetDirectory,
                 commonNamespace: $commonNamespace,
-                phpNamespace: $definition['php_namespace'],
-                className: $definition['class_name'],
+                phpNamespace: $definition->phpNamespace,
+                className: $definition->className,
             );
 
             if (is_file($targetFile) && !$config->overwriteExisting) {
@@ -62,13 +69,13 @@ final class XsdToPhpGenerator implements ClassGeneratorInterface
             }
 
             $contents = $this->buildClassFile(
-                namespace: $definition['php_namespace'],
-                className: $definition['class_name'],
-                rootName: $definition['root_name'],
+                namespace: $definition->phpNamespace,
+                className: $definition->className,
+                rootName: $definition->rootName,
                 strictTypes: $config->strictTypes,
-                targetNamespace: $definition['root_namespace'],
-                rootNamespaces: $definition['root_namespaces'],
-                properties: $definition['properties'],
+                targetNamespace: $definition->rootNamespace,
+                rootNamespaces: $definition->rootNamespaces,
+                properties: $definition->properties,
             );
 
             if (file_put_contents($targetFile, $contents) === false) {
@@ -1265,32 +1272,32 @@ PHP;
         $definitions = [];
 
         foreach ($properties as $property) {
-            $arguments = [sprintf("'%s'", addslashes($property['xml_name']))];
+            $arguments = [sprintf("'%s'", addslashes($property->xmlName))];
 
-            if ($property['is_attribute']) {
+            if ($property->isAttribute) {
                 $arguments[] = 'isAttribute: true';
             }
 
-            if ($property['is_list']) {
+            if ($property->isList) {
                 $arguments[] = 'isList: true';
             }
 
-            if ($property['item_type_expression'] !== null) {
-                $arguments[] = 'itemType: ' . $property['item_type_expression'];
+            if ($property->itemTypeExpression !== null) {
+                $arguments[] = 'itemType: ' . $property->itemTypeExpression;
             }
 
-            if ($property['namespace'] !== null) {
-                $arguments[] = sprintf("namespace: '%s'", addslashes($property['namespace']));
+            if ($property->namespace !== null) {
+                $arguments[] = sprintf("namespace: '%s'", addslashes($property->namespace));
             }
 
             $defaultValue = match (true) {
-                isset($property['default_value_expression']) && $property['default_value_expression'] !== null => ' = ' . $property['default_value_expression'],
-                $property['php_type'] === 'array' => ' = []',
+                $property->defaultValueExpression !== null => ' = ' . $property->defaultValueExpression,
+                $property->phpType === 'array' => ' = []',
                 default => ' = null',
             };
 
             $definitions[] = sprintf('    #[XmlElement(%s)]', implode(', ', $arguments));
-            $definitions[] = sprintf('    public %s $%s%s;', $property['php_type'], $property['property_name'], $defaultValue);
+            $definitions[] = sprintf('    public %s $%s%s;', $property->phpType, $property->propertyName, $defaultValue);
             $definitions[] = '';
         }
 
@@ -1304,6 +1311,71 @@ PHP;
     private function implodeLines(array $lines): string
     {
         return implode("\n", $lines);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $definitions
+     *
+     * @return list<ClassDefinition>
+     */
+    private function hydrateClassDefinitions(array $definitions): array
+    {
+        $hydratedDefinitions = [];
+
+        foreach ($definitions as $definition) {
+            $hydratedDefinitions[] = new ClassDefinition(
+                className: $definition['class_name'],
+                phpNamespace: $definition['php_namespace'],
+                rootName: $definition['root_name'],
+                rootNamespace: $definition['root_namespace'],
+                rootNamespaces: $definition['root_namespaces'],
+                properties: $this->hydratePropertyDefinitions($definition['properties']),
+            );
+        }
+
+        return $hydratedDefinitions;
+    }
+
+    /**
+     * @param list<array<string, mixed>> $properties
+     *
+     * @return list<PropertyDefinition>
+     */
+    private function hydratePropertyDefinitions(array $properties): array
+    {
+        $hydratedProperties = [];
+
+        foreach ($properties as $property) {
+            $hydratedProperties[] = new PropertyDefinition(
+                propertyName: $property['property_name'],
+                xmlName: $property['xml_name'],
+                isAttribute: $property['is_attribute'],
+                isList: $property['is_list'],
+                namespace: $property['namespace'],
+                phpType: $property['php_type'],
+                itemTypeExpression: $property['item_type_expression'],
+                defaultValueExpression: $property['default_value_expression'],
+            );
+        }
+
+        return $hydratedProperties;
+    }
+
+    /**
+     * @param list<ClassDefinition> $definitions
+     * @param list<\Ermtraud\XsdToPhp\Contract\DefinitionTransformerInterface> $transformers
+     *
+     * @return list<ClassDefinition>
+     */
+    private function applyTransformers(array $definitions, array $transformers): array
+    {
+        foreach ($transformers as $transformer) {
+            foreach ($definitions as $index => $definition) {
+                $definitions[$index] = $transformer->transform($definition);
+            }
+        }
+
+        return $definitions;
     }
 
     /**

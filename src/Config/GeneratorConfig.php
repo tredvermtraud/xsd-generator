@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ermtraud\XsdToPhp\Config;
 
+use Ermtraud\XsdToPhp\Contract\DefinitionTransformerInterface;
 use Ermtraud\XsdToPhp\Exception\InvalidConfiguration;
 
 /**
@@ -14,6 +15,7 @@ final readonly class GeneratorConfig
     /**
      * @param array<string, string> $namespaceMap
      * @param array<string, string> $schemaLocations
+     * @param list<DefinitionTransformerInterface> $transformers
      */
     public function __construct(
         public string $inputSchema,
@@ -26,6 +28,7 @@ final readonly class GeneratorConfig
         public bool $strictTypes,
         public bool $overwriteExisting,
         public bool $preferEntrypointNamespaceDeclarations,
+        public array $transformers = [],
     ) {
     }
 
@@ -46,6 +49,7 @@ final readonly class GeneratorConfig
         $strictTypes = (bool) ($config['strict_types'] ?? true);
         $overwriteExisting = (bool) ($config['overwrite_existing'] ?? false);
         $preferEntrypointNamespaceDeclarations = (bool) ($config['prefer_entrypoint_namespace_declarations'] ?? false);
+        $transformers = $config['transformers'] ?? [];
 
         if (!is_array($namespaceMap)) {
             throw new InvalidConfiguration('The "generator.namespace_map" value must be an array.');
@@ -53,6 +57,10 @@ final readonly class GeneratorConfig
 
         if (!is_array($schemaLocations)) {
             throw new InvalidConfiguration('The "generator.schema_locations" value must be an array.');
+        }
+
+        if (!is_array($transformers)) {
+            throw new InvalidConfiguration('The "generator.transformers" value must be an array.');
         }
 
         foreach ($namespaceMap as $xmlNamespace => $phpNamespace) {
@@ -67,6 +75,14 @@ final readonly class GeneratorConfig
             }
         }
 
+        foreach ($transformers as $transformer) {
+            if (!$transformer instanceof DefinitionTransformerInterface) {
+                throw new InvalidConfiguration(
+                    'The "generator.transformers" array must contain only DefinitionTransformerInterface instances.',
+                );
+            }
+        }
+
         return new self(
             inputSchema: $inputSchema,
             entrypoint: $entrypoint,
@@ -78,6 +94,7 @@ final readonly class GeneratorConfig
             strictTypes: $strictTypes,
             overwriteExisting: $overwriteExisting,
             preferEntrypointNamespaceDeclarations: $preferEntrypointNamespaceDeclarations,
+            transformers: array_values($transformers),
         );
     }
 

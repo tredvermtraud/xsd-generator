@@ -36,6 +36,8 @@ composer require ermtraud/xsd-generator
 
 ```php
 use Ermtraud\XsdToPhp\Config\GeneratorConfig;
+use Ermtraud\XsdToPhp\Contract\DefinitionTransformerInterface;
+use Ermtraud\XsdToPhp\Definition\ClassDefinition;
 use Ermtraud\XsdToPhp\Generator\XsdToPhpGenerator;
 
 $config = GeneratorConfig::fromArray([
@@ -48,6 +50,22 @@ $config = GeneratorConfig::fromArray([
     ],
     'schema_locations' => [
         'http://example.com/schema' => 'path/to/schema.xsd',
+    ],
+    'transformers' => [
+        new class implements DefinitionTransformerInterface
+        {
+            public function transform(ClassDefinition $definition): ClassDefinition
+            {
+                if (
+                    !$definition->hasProperty('ListURI', true)
+                    || !$definition->hasProperty('ListVersionID', true)
+                ) {
+                    return $definition;
+                }
+
+                return $definition->withPropertyDefaultValue('ListVersionID', "'1.2'", true);
+            }
+        },
     ],
 ]);
 
@@ -81,6 +99,13 @@ The `GeneratorConfig` accepts the following options:
 - `strict_types` (bool, optional, default: true): Enable strict types in generated classes
 - `overwrite_existing` (bool, optional, default: false): Whether to overwrite existing files
 - `prefer_entrypoint_namespace_declarations` (bool, optional, default: false): Prefer `xmlns:*` prefixes from the configured `input_schema` when generating root namespace declarations, while still falling back to schema-local declarations for namespaces the entrypoint does not declare
+- `transformers` (array, optional): Ordered list of `DefinitionTransformerInterface` instances that can mutate generated class definitions before files are rendered
+
+### Definition Transformers
+
+Transformers let consuming projects apply deterministic generation rules without post-processing generated PHP files. They run after the XSD graph has been resolved and before classes are written to disk.
+
+Use a transformer when the rule is about generated structure, such as setting a default value when a class contains a specific attribute combination.
 
 ## Testing
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.org/transformers/value-sensitive"
+           xmlns="http://example.org/transformers/value-sensitive"
+           elementFormDefault="qualified">
+    <xs:complexType name="FixedUriVersionedListType">
+        <xs:attribute name="ListURI" type="xs:anyURI" fixed="urn:example:fixed"/>
+        <xs:attribute name="ListVersionID" type="xs:token"/>
+    </xs:complexType>
+</xs:schema>
