@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/tredvermtraud/xsd-generator/compare/v1.0.1...v1.1.0) (2026-04-21)
+
+
+### Features
+
+* Implemented a Data Transformer API ([#8](https://github.com/tredvermtraud/xsd-generator/issues/8)) ([b2439dd](https://github.com/tredvermtraud/xsd-generator/commit/b2439ddce077d55406231d1cea72243c711fd542))
+
 ## [1.0.1](https://github.com/tredvermtraud/xsd-generator/compare/v1.0.0...v1.0.1) (2026-04-21)
 
 
