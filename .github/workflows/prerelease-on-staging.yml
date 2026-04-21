@@ -1,0 +1,109 @@
+name: Prerelease On Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prerelease-staging
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Run CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  package:
+    name: Build Release Artifacts
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+      prerelease_tag: ${{ steps.meta.outputs.prerelease_tag }}
+      target_sha: ${{ steps.meta.outputs.target_sha }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive prerelease metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          TAG="staging-${SHORT_SHA}"
+          ARTIFACT_NAME="xml-runtime-${TAG}"
+          echo "artifact_name=${ARTIFACT_NAME}" >> "$GITHUB_OUTPUT"
+          echo "prerelease_tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "target_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build source archives
+        run: |
+          mkdir -p dist
+          PREFIX="${{ steps.meta.outputs.artifact_name }}/"
+          git archive --format=tar.gz --output="dist/${{ steps.meta.outputs.artifact_name }}.tar.gz" --prefix="${PREFIX}" HEAD
+          git archive --format=zip --output="dist/${{ steps.meta.outputs.artifact_name }}.zip" --prefix="${PREFIX}" HEAD
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Prerelease
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PRERELEASE_TAG: ${{ needs.package.outputs.prerelease_tag }}
+      TARGET_SHA: ${{ needs.package.outputs.target_sha }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download packaged artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.package.outputs.artifact_name }}
+          path: dist
+
+      - name: Remove older auto-managed staging prereleases
+        # Keeping only the newest staging prerelease avoids duplicate releases and stale staging tags.
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+            --jq '.[] | select(.prerelease and (.tag_name | startswith("staging-"))) | .tag_name' |
+            while read -r old_tag; do
+              if [ -n "${old_tag}" ]; then
+                gh release delete "${old_tag}" --yes --cleanup-tag || true
+              fi
+            done
+
+      - name: Create or update the staging tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -fa "${PRERELEASE_TAG}" -m "Staging prerelease ${PRERELEASE_TAG}" "${TARGET_SHA}"
+          git push --force origin "refs/tags/${PRERELEASE_TAG}"
+
+      - name: Publish prerelease
+        run: |
+          gh release create "${PRERELEASE_TAG}" dist/* \
+            --title "${PRERELEASE_TAG}" \
+            --prerelease \
+            --generate-notes
