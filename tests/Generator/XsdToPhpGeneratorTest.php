@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Ermtraud\XsdToPhp\Tests\Generator;
 
 use DOMDocument;
-use PHPUnit\Framework\TestCase;
 use Ermtraud\XsdToPhp\Config\GeneratorConfig;
+use Ermtraud\XsdToPhp\Contract\DefinitionTransformerInterface;
+use Ermtraud\XsdToPhp\Definition\ClassDefinition;
+use Ermtraud\XsdToPhp\Exception\InvalidConfiguration;
 use Ermtraud\XsdToPhp\Generator\XsdToPhpGenerator;
+use PHPUnit\Framework\TestCase;
 
 final class XsdToPhpGeneratorTest extends TestCase
 {
@@ -136,6 +139,104 @@ final class XsdToPhpGeneratorTest extends TestCase
         self::assertStringContainsString("public ?string \$listURI = 'urn:example:fixed';", $contents);
     }
 
+    public function testItAppliesConfiguredDefinitionTransformersBeforeRendering(): void
+    {
+        $outputDirectory = $this->createTemporaryDirectory();
+        $config = $this->buildConfig([
+            'generator' => [
+                'input_schema' => $this->schemaPath('transformers/schema.xsd'),
+                'entrypoint' => 'VersionedListType',
+                'output_directory' => $outputDirectory,
+                'base_namespace' => 'Tests\\Generated\\Transformers',
+                'namespace_map' => [
+                    'http://example.org/transformers' => 'Tests\\Generated\\Transformers',
+                ],
+                'schema_locations' => [
+                    'http://example.org/transformers' => $this->schemaPath('transformers/schema.xsd'),
+                ],
+                'transformers' => [
+                    new class implements DefinitionTransformerInterface
+                    {
+                        public function transform(ClassDefinition $definition): ClassDefinition
+                        {
+                            if (
+                                !$definition->hasProperty('ListURI', true)
+                                || !$definition->hasProperty('ListVersionID', true)
+                            ) {
+                                return $definition;
+                            }
+
+                            return $definition->withPropertyDefaultValue('ListVersionID', "'1.2'", true);
+                        }
+                    },
+                ],
+            ],
+        ]);
+
+        (new XsdToPhpGenerator())->generate($config);
+        $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'VersionedListType.php');
+
+        self::assertStringContainsString("public ?string \$listVersionID = '1.2';", $contents);
+        self::assertStringContainsString('public ?string $listURI = null;', $contents);
+    }
+
+    public function testGeneratorConfigRejectsNonTransformerInstances(): void
+    {
+        $this->expectException(InvalidConfiguration::class);
+
+        GeneratorConfig::fromArray([
+            'input_schema' => $this->schemaPath('fixed-values/schema.xsd'),
+            'entrypoint' => 'FixedValueType',
+            'output_directory' => 'generated',
+            'base_namespace' => 'Tests\\Generated\\FixedValues',
+            'transformers' => [new \stdClass()],
+        ]);
+    }
+
+    public function testItAppliesTransformerOnlyWhenListUriMatchesExpectedFixedValue(): void
+    {
+        $outputDirectory = $this->createTemporaryDirectory();
+        $config = $this->buildConfig([
+            'generator' => [
+                'input_schema' => $this->schemaPath('transformers/value-sensitive.xsd'),
+                'entrypoint' => 'FixedUriVersionedListType',
+                'output_directory' => $outputDirectory,
+                'base_namespace' => 'Tests\\Generated\\Transformers',
+                'namespace_map' => [
+                    'http://example.org/transformers/value-sensitive' => 'Tests\\Generated\\Transformers',
+                ],
+                'schema_locations' => [
+                    'http://example.org/transformers/value-sensitive' => $this->schemaPath('transformers/value-sensitive.xsd'),
+                ],
+                'transformers' => [
+                    new class implements DefinitionTransformerInterface
+                    {
+                        public function transform(ClassDefinition $definition): ClassDefinition
+                        {
+                            $listUri = $definition->property('ListURI', true);
+
+                            if (
+                                !$listUri instanceof \Ermtraud\XsdToPhp\Definition\PropertyDefinition
+                                || $listUri->defaultValueExpression !== "'urn:example:fixed'"
+                                || !$definition->hasProperty('ListVersionID', true)
+                            ) {
+                                return $definition;
+                            }
+
+                            return $definition->withPropertyDefaultValue('ListVersionID', "'1.2'", true);
+                        }
+                    },
+                ],
+            ],
+        ]);
+
+        (new XsdToPhpGenerator())->generate($config);
+        $contents = (string) file_get_contents($outputDirectory . DIRECTORY_SEPARATOR . 'FixedUriVersionedListType.php');
+
+        self::assertStringContainsString("public ?string \$listURI = 'urn:example:fixed';", $contents);
+        self::assertStringContainsString("public ?string \$listVersionID = '1.2';", $contents);
+    }
+
     /**
      * @param array<string, mixed> $config
      */
@@ -152,6 +253,7 @@ final class XsdToPhpGeneratorTest extends TestCase
             'strict_types' => true,
             'overwrite_existing' => false,
             'prefer_entrypoint_namespace_declarations' => false,
+            'transformers' => [],
         ], $config['generator'] ?? $config));
     }
 
