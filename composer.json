@@ -11,8 +11,8 @@
     ],
     "repositories": [
         {
-            "type": "path",
-            "url": "C:/Users/Runkel.ASGARD/Documents/Projects/ermtraud/xml-runtime"
+            "type": "vcs",
+            "url": "https://github.com/tredvermtraud/xml-runtime.git"
         }
     ],
     "require": {

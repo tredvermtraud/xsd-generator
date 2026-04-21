@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a9058541de20c1d6f45a1339d5f01d9",
+    "content-hash": "756ffb3f7ff031f24a1f647b561ae7ef",
     "packages": [
         {
             "name": "ermtraud/xml-runtime",
             "version": "dev-staging",
-            "dist": {
-                "type": "path",
-                "url": "C:/Users/Runkel.ASGARD/Documents/Projects/ermtraud/xml-runtime",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:tredvermtraud/xml-runtime.git",
                 "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tredvermtraud/xml-runtime/zipball/6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
+                "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
+                "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
@@ -48,9 +54,11 @@
                 "serializer",
                 "xml"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "source": "https://github.com/tredvermtraud/xml-runtime/tree/staging",
+                "issues": "https://github.com/tredvermtraud/xml-runtime/issues"
+            },
+            "time": "2026-04-20T14:47:05+00:00"
         }
     ],
     "packages-dev": [
@@ -1727,7 +1735,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "ermtraud/xml-runtime": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
