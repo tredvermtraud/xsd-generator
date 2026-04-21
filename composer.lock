@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "756ffb3f7ff031f24a1f647b561ae7ef",
+    "content-hash": "770d40d8464aa652d347a1ff98c5dbfa",
     "packages": [
         {
             "name": "ermtraud/xml-runtime",
-            "version": "dev-staging",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:tredvermtraud/xml-runtime.git",
-                "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5"
+                "url": "https://github.com/tredvermtraud/xml-runtime.git",
+                "reference": "10bf2c05ff821b984b282b94c73a5f4d460969ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tredvermtraud/xml-runtime/zipball/6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
-                "reference": "6536c5d75cfb00b4c34b0e6bdbc1fc19e835d1f5",
+                "url": "https://api.github.com/repos/tredvermtraud/xml-runtime/zipball/10bf2c05ff821b984b282b94c73a5f4d460969ef",
+                "reference": "10bf2c05ff821b984b282b94c73a5f4d460969ef",
                 "shasum": ""
             },
             "require": {
@@ -55,10 +55,10 @@
                 "xml"
             ],
             "support": {
-                "source": "https://github.com/tredvermtraud/xml-runtime/tree/staging",
+                "source": "https://github.com/tredvermtraud/xml-runtime/tree/v1.0.1",
                 "issues": "https://github.com/tredvermtraud/xml-runtime/issues"
             },
-            "time": "2026-04-20T14:47:05+00:00"
+            "time": "2026-04-21T08:49:35+00:00"
         }
     ],
     "packages-dev": [
@@ -1735,9 +1735,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "ermtraud/xml-runtime": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

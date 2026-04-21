@@ -90,52 +90,52 @@ Run the test suite using PHPUnit:
 composer test
 ```
 
-## Release Process
+## CI and Release Process
 
-This repository uses a tag-based release model with a stable `main` branch and a continuously testable `staging` branch.
+The repository currently uses two GitHub Actions workflows:
 
-- `main`: production-ready history only
-- `staging`: release-candidate integration branch
-- `feature/*`: feature work merged into `staging`
-- `hotfix/*`: urgent fixes branched from `main`, merged back to `main`, then back-merged into `staging`
+- `CI` runs on every pull request targeting `main` and on every push to `main`
+- `Release` runs on every push to `main` and is powered by [Release Please](https://github.com/googleapis/release-please)
 
-### Prereleases From `staging`
+### CI
 
-Every push to `staging` runs CI and, if it passes, publishes a GitHub prerelease with an auto-managed `staging-<short-sha>` tag. Older auto-generated staging prereleases are cleaned up first so the repository keeps one current prerelease instead of accumulating noise.
+The CI workflow validates `composer.json`, installs dependencies, and runs the PHPUnit suite against:
 
-Developer flow:
+- PHP 8.3
+- PHP 8.4
 
-1. Merge feature branches into `staging`.
-2. Push `staging`.
-3. Wait for the `Prerelease On Staging` workflow to pass.
-4. Test the generated GitHub prerelease artifacts and notes.
+### Releases
 
-### Production Releases From `main`
+Releases are managed from `main` only. There is no `staging` branch or tag-driven release workflow anymore.
 
-Production releases are created only from SemVer tags such as `v1.2.0` or `v2.0.1`. The release workflow verifies that the tagged commit is reachable from `main`, reruns CI, packages the library, and creates a full GitHub Release.
+`release-please-action` watches commits on `main` and opens or updates a release PR based on the repository manifest and config files:
 
-Developer flow:
+- `.release-please-config.json`
+- `.release-please-manifest.json`
 
-1. Merge the validated release candidate from `staging` into `main`.
-2. Create and push a production tag from `main`, for example:
+When the release PR is merged, Release Please creates the version tag and GitHub Release automatically.
 
-```bash
-git checkout main
-git pull --ff-only
-git tag v1.2.0
-git push origin v1.2.0
-```
+### Commit Convention
 
-3. Wait for the `Release On Version Tag` workflow to publish the official GitHub Release.
+Release Please depends on Conventional Commit-style messages to determine the next version bump and release notes. In practice:
 
-### Hotfix Flow
+- `fix:` triggers a patch release
+- `feat:` triggers a minor release
+- `feat!:` or a commit with a `BREAKING CHANGE:` footer triggers a major release
 
-Hotfixes branch from `main`, not `staging`.
+If merged commits do not follow this convention, Release Please may not produce the expected release.
 
-1. Create `hotfix/<name>` from `main`.
-2. Merge the hotfix into `main`.
-3. Tag the merge commit on `main` with the next production version and push the tag.
-4. Back-merge the hotfix changes into `staging` so the next prerelease includes them.
+### Maintainer Flow
+
+1. Open a pull request against `main`.
+2. Wait for the `CI` workflow to pass.
+3. Merge using a Conventional Commit-style message.
+4. Wait for Release Please to open or update the release PR.
+5. Review and merge the release PR to publish the new GitHub Release.
+
+### Repository Setup Note
+
+The release workflow is configured to use the `RELEASE_PLEASE_TOKEN` secret. Repository maintainers must provide that secret for automated release PR creation and publishing.
 
 ## License
 
